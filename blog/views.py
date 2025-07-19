@@ -1,9 +1,8 @@
-from django.shortcuts import render, get_object_or_404
+from django.shortcuts import render, get_object_or_404, redirect
 from .models import Post
-from .forms import FormularioComentario
+from .forms import FormularioComentario, PostForm
 from django.contrib.auth import authenticate, login, logout
 from django.contrib.auth.models import User
-from django.shortcuts import redirect
 from django.contrib.auth.decorators import login_required
 
 
@@ -11,6 +10,7 @@ from django.contrib.auth.decorators import login_required
 def lista_post(request):
     posts = Post.objects.all().order_by('-fecha_publicacion')
     return render(request, 'blog/lista_posts.html', {'posts': posts})
+
 
 @login_required
 def detalle_post(request, pk):
@@ -33,12 +33,20 @@ def detalle_post(request, pk):
         'form': form
     })
 
-'''
-class ListaPostView(ListView):
-    model = Post
-    template_name = 'blog/lista_post_cbv.html'
-    context_object_name = 'posts'
-'''
+
+@login_required
+def crear_post(request):
+    if request.method == 'POST':
+        form = PostForm(request.POST)
+        if form.is_valid():
+            form.save()
+            return redirect('lista_post')
+    else:
+        form = PostForm()
+    
+    return render(request, 'blog/crear_post.html', {'form': form})
+
+
 def registro(request):
     if request.method == 'POST':
         username = request.POST['username']
@@ -48,19 +56,20 @@ def registro(request):
     
     return render(request, 'blog/registro.html')
 
+
 def iniciar_sesion(request):
     if request.method == 'POST':
         username = request.POST['username']
         password = request.POST['password']
-        user = authenticate(request, username = username, password = password)
+        user = authenticate(request, username=username, password=password)
         if user:
             login(request, user)
             return redirect('lista_post')
-        
         else:
-            return render(request, 'blog/login.html', {'error': 'credenciales incorrectas'})
+            return render(request, 'blog/login.html', {'error': 'Credenciales incorrectas'})
     
     return render(request, 'blog/login.html')
+
 
 def cerrar_sesion(request):
     logout(request)

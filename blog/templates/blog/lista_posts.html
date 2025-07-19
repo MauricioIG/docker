@@ -19,5 +19,11 @@
 {% empty %}
     <p>No hay publicaciones todavía.</p>
 {% endfor %}
+
+<div>
+    <a href="{% url 'crear_post' %}" class="btn btn-primary">Crear Nuevo Post</a>
+</div>
+
 {% endblock %}
+
 
